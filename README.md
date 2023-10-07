@@ -181,8 +181,8 @@ See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all ve
   author       = {Alesiani, Francesco},
   title        = {PyTorch Geometric Algebra},
   publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.3902404},
-  url          = {https://doi.org/10.5281/zenodo.3902404}
+  doi          = {10.xxx/zenodo.xxx},
+  url          = {https://doi.org/10.xxx/zenodo.xxx}
 }
 
 The libriry is based on the Tensorflow implementation from
