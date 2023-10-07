@@ -180,10 +180,11 @@ See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all ve
 @software{torch_ga,
   author       = {Alesiani, Francesco},
   title        = {PyTorch Geometric Algebra},
-  publisher    = {Zenodo},
-  doi          = {10.xxx/zenodo.xxx},
-  url          = {https://doi.org/10.xxx/zenodo.xxx}
+  publisher    = {Github},
+  url          = {https://github.com/falesiani/torch_ga}
 }
+
+
 
 The libriry is based on the Tensorflow implementation from
 @software{python_tfga,
