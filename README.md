@@ -1,5 +1,6 @@
 # torch_ga - PyTorch Geometric Algebra
-[![Build status](https://github.com/falesiani/torch_ga/blob/main/workflow/icon-build.svg)](https://github.com/Falesiani/torch_ga/actions) 
+
+[Build status](https://github.com/Falesiani/torch_ga/actions)
 
 [GitHub](https://github.com/falesiani/torch_ga) | [Docs](https://github.com/falesiani/torch_ga) | [Benchmarks](https://github.com/falesiani/torch_ga/tree/master/benchmarks) 
 
