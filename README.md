@@ -1,10 +1,7 @@
 # torch_ga - PyTorch Geometric Algebra
-[![Build status](https://github.com/Falesiani/torch_ga/workflows/icon-build.svg)](https://github.com/Falesiani/torch_ga/actions) 
-<!-- [![PyPI](https://badge.fury.io/py/torch_ga.svg)](https://badge.fury.io/py/torch_ga)  -->
-<!-- [![DOI](https://zenodo.org/badge/DOI//zenodo..svg)](https://doi.org//zenodo.) -->
+[![Build status](https://github.com/falesiani/torch_ga/blob/main/workflow/icon-build.svg)](https://github.com/Falesiani/torch_ga/actions) 
 
 [GitHub](https://github.com/falesiani/torch_ga) | [Docs](https://github.com/falesiani/torch_ga) | [Benchmarks](https://github.com/falesiani/torch_ga/tree/master/benchmarks) 
-<!-- | [Slides](https://github.com/falesiani/torch_ga) -->
 
 Python package for Geometric / Clifford Algebra with Pytorch.
 
