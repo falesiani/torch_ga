@@ -6,7 +6,8 @@
 Python package for Geometric / Clifford Algebra with Pytorch.
 
 **This project is a work in progress. Its API may change and the examples aren't polished yet.**
-**This project is based on the TF-GA library**
+
+**This project is based on the TF-GA library [TGA](https://doi.org/10.5281/zenodo.3902404)**
 
 
 Pull requests and suggestions either by opening an issue or by [sending me an email](mailto:francesco.alesiani@neclab.eu) are welcome.
@@ -174,7 +175,7 @@ Tests using Python's built-in [`unittest`](https://docs.python.org/3/library/uni
 executing `python -m unittest discover tests` from the root directory of the repository.
 
 ## Citing
-See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all versions the following BibTeX can be used
+For citing all versions the following BibTeX can be used
 
 ```
 @software{torch_ga,
@@ -182,17 +183,6 @@ See our [Zenodo](https://doi.org/10.5281/zenodo.3902404) page. For citing all ve
   title        = {PyTorch Geometric Algebra},
   publisher    = {Github},
   url          = {https://github.com/falesiani/torch_ga}
-}
-
-
-
-The libriry is based on the Tensorflow implementation from
-@software{python_tfga,
-  author       = {Kahlow, Robin},
-  title        = {TensorFlow Geometric Algebra},
-  publisher    = {Zenodo},
-  doi          = {10.5281/zenodo.3902404},
-  url          = {https://doi.org/10.5281/zenodo.3902404}
 }
 ```
 
