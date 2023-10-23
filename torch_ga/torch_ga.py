@@ -16,7 +16,7 @@ from .blades import (
     BladeKind, get_blade_of_kind_indices, get_blade_indices_from_names,
     get_blade_repr, invert_blade_indices
 )
-from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism, mv_conv1d, f_mv_conv1d
+from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism, mv_conv1d, f_mv_conv1d, mv_multiply_element_wise
 from .mv import MultiVector
 
 
@@ -668,6 +668,31 @@ class GeometricAlgebra:
         a = a.to(dtype=torch.float32)
         b = b.to(dtype=torch.float32)
         return mv_multiply(a, b, self._cayley)
+
+    
+    def element_wise_prod(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
+        """Returns the element-wise product of two geometric
+        algebra tensors.
+
+        Args:
+            a: Geometric algebra tensor on the left hand side of
+            the geometric product
+            b: Geometric algebra tensor on the right hand side of
+            the geometric product
+
+        Returns:
+            geometric product of a and b
+        """
+        # a = torch.tensor(a, dtype=torch.float32)
+        # b = torch.tensor(b, dtype=torch.float32)
+
+        # a = torch.tensor(a)
+        # b = torch.tensor(b)
+
+        a = a.to(dtype=torch.float32)
+        b = b.to(dtype=torch.float32)
+        return mv_multiply_element_wise(a, b, self._cayley)
+
 
     def inner_prod(self, a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
         """Returns the inner product of two geometric

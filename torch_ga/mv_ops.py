@@ -45,6 +45,10 @@ def mv_multiply(a_blade_values: torch.Tensor, b_blade_values: torch.Tensor, cayl
     return x
 
 
+def mv_multiply_element_wise(a_blade_values: torch.Tensor, b_blade_values: torch.Tensor, cayley: torch.Tensor) -> torch.Tensor:
+    x = a_blade_values * b_blade_values
+    return x
+
 import math
 import torch.nn.functional as F
 # https://discuss.pytorch.org/t/tf-extract-image-patches-in-pytorch/43837/10
