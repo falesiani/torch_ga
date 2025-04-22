@@ -52,7 +52,7 @@ class TestDualGeometricAlgebraMultiply(ut.TestCase):
         one = ga.from_scalar(1.0)
 
         # eps = ga.from_tensor_with_kind(torch.ones(1), kind="pseudoscalar")
-        eps = ga.from_tensor_with_kind(torch.tensor([1]), kind="pseudoscalar").squeeze()
+        eps = ga.from_tensor_with_kind(torch.tensor([1.]), kind="pseudoscalar").squeeze()
         ten = ga.from_scalar(10.0)
         if False:        
             print(f"one={one}")

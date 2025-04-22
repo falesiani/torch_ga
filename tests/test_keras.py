@@ -238,7 +238,7 @@ class TestKerasLayersSerializable(ut.TestCase):
 
         device = torch.device('cpu')
         loaded_model = nn.Sequential(*[layer])
-        loaded_model.load_state_dict(torch.load(model_file, map_location=device))
+        loaded_model.load_state_dict(torch.load(model_file, map_location=device,weights_only=True))
         
 
         # Predict on same inputs as before
