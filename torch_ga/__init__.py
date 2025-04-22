@@ -4,7 +4,6 @@ PyTorch Geometric Algebra
 An python library for Geometric Algebra in Pytorch
 """
 
-__version__ = "0.0.4"
 __author__ = 'Francesco Alesiani'
 __credits__ = 'Torch-GA'
 

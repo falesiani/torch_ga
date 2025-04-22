@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "torch_ga"
-version = "0.0.4"
+dynamic = ["version"]
 description = "Clifford and Geometric Algebra with PyTorch"
 readme = "README.md"
 authors = [
@@ -35,4 +35,7 @@ torch = ["pytorch>=1.12.1"]
 
 [project.urls]
 Homepage = "https://github.com/falesiani/torch_ga"
-Repository = "https://github.com/falesiani/torch_ga.git" 
+Repository = "https://github.com/falesiani/torch_ga.git"
+
+[tool.setuptools.dynamic]
+version = {attr = "torch_ga.__version__.__version__"} 
