@@ -19,7 +19,7 @@ class BladeKind(Enum):
     PSEUDOTRIVECTOR = "pseudotrivector"
 
 
-def get_blade_repr(blade_name: str, _scalar_name="1", _latex_flag=False,base_symbol="b") -> str:
+def get_blade_repr(blade_name: str, _scalar_name="1", _latex_flag=False, base_symbol="e") -> str:
     """Returns the representation to use
     for a given blade.
 

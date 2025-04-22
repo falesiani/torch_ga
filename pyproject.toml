@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "torch_ga"
+version = "0.0.4"
+description = "Clifford and Geometric Algebra with PyTorch"
+readme = "README.md"
+authors = [
+    {name = "Francesco Alesiani", email = "francesco.alesiani@neclab.eu"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["geometric-algebra", "clifford-algebra", "pytorch", "multi-vector", "para-vector", "mathematics", "machine-learning"]
+dependencies = []
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+torch = ["pytorch>=1.12.1"]
+
+[project.urls]
+Homepage = "https://github.com/falesiani/torch_ga"
+Repository = "https://github.com/falesiani/torch_ga.git" 
