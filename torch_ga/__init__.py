@@ -4,8 +4,18 @@ PyTorch Geometric Algebra
 An python library for Geometric Algebra in Pytorch
 """
 
-__version__ = "0.0.2"
+__version__ = "0.0.4"
 __author__ = 'Francesco Alesiani'
-__credits__ = 'TF-GA (https://doi.org/10.5281/zenodo.3902404)'
+__credits__ = 'Torch-GA'
 
-from .torch_ga import GeometricAlgebra
+# from .torch_ga import GeometricAlgebra
+from .torch_ga import *
+from .blades import *
+from .cayley import *
+from .layers import *
+from .mv_ops import *
+from .mv import *
+from .utils import *
+from .plots import *
+from .jacobian import *
+from .transform import *

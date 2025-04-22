@@ -19,7 +19,7 @@ class BladeKind(Enum):
     PSEUDOTRIVECTOR = "pseudotrivector"
 
 
-def get_blade_repr(blade_name: str) -> str:
+def get_blade_repr(blade_name: str, _scalar_name="1", _latex_flag=False,base_symbol="b") -> str:
     """Returns the representation to use
     for a given blade.
 
@@ -33,9 +33,15 @@ def get_blade_repr(blade_name: str) -> str:
     Returns:
         Representation to use for a given blade
     """
+    # if blade_name == "":
+    #     return "1"
+    # return "e_%s" % blade_name
     if blade_name == "":
-        return "1"
-    return "e_%s" % blade_name
+        return _scalar_name
+    if _latex_flag:
+        return f"{base_symbol}_{{{blade_name}}}"
+    else:
+        return f"{base_symbol}{blade_name}"
 
 
 def is_blade_kind(blade_degrees: torch.Tensor, kind: List[Union[BladeKind, str]], max_degree: int) -> torch.Tensor:
@@ -209,4 +215,81 @@ def get_blade_indices_from_names(blade_names: List[str],
     return (torch.tensor(blade_signs, dtype=torch.float32),
             torch.tensor(blade_indices, dtype=torch.int64))
 
+import math
+from itertools import accumulate
+def get_sub_algebra(n):
+    """
+    We have an algebra G(n) and we want to get G(n-1)
+    it suppose to take the first element
+    """
+    idx_full = [math.comb(n, _) for _ in range(n+1)]
+    idx_reduced = [math.comb(n-1, _) for _ in range(n)]
+    pos_full = list(accumulate(idx_full))
+    # pos_reduced = list(accumulate(idx_reduced))    
+    pos_complex = [ pos+_  for pos,num in zip(pos_full,idx_reduced) for _ in  range(num)]
+    pos_real = [ _  for _ in range(1<<n) if not _ in pos_complex]    
+    return pos_real, pos_complex    
+def get_sub_algebra_tree(n,k=1):
+    """
+    Returns the sub-algebra tree, 
+    up to level 1<=k<=mn
+    """
+    assert(k<=n),f"should be k={k}<=n={n}"
+    def _split(_list,n):
+        def _filter(_list,_idx):
+            return [_list[_] for _ in _idx]
+        assert(len(_list)==1<<n),"should be correct size"
+        if n<=1 or n<=k:
+            return _list
+        _r,_c = get_sub_algebra(n)
+        _sr,_sc = _split(_filter(_list,_r),n-1),_split(_filter(_list,_c),n-1)
+        # return [_list,_sr,_sc]
+        return [_sr,_sc]
+    _list = list(range(1<<n))
+    return _split(_list,n)
+def get_merged_tree(_tree,pairs_flag=True):
+    """
+    Flattens the tree
+    """
+    def _merge(_tmp):        
+        if (pairs_flag and type(_tmp[0][0])==list) or (not pairs_flag and type(_tmp[0])==list):
+            return _merge(_tmp[0])+_merge(_tmp[1])
+        return _tmp
+    _tree = _merge(_tree)
+    return _tree
 
+def get_complex_indexes(n):
+    _tree = get_sub_algebra_tree(n)
+    _list = get_merged_tree(_tree)
+    return _list, _tree
+
+
+def test():
+    # tr = [0,2,3,4,8,9,10,14]
+    # pr = [1,5,6,7,11,12,13,15]
+    # print(get_sub_algebra(4))
+    # print(get_sub_algebra(3))
+    # print(get_sub_algebra(2))
+
+    # print(get_sub_algebra(4))
+    # print(get_sub_algebra_tree(4,3))
+    
+    _real,_complex = get_sub_algebra(4)
+    print(_real,_complex)
+    
+    # _tree = get_sub_algebra_tree(4,2)
+    _tree = get_sub_algebra_tree(4)
+    
+    # print(_tree)
+    # print(len(_tree))
+
+    print(get_merged_tree(_tree))
+    # print(get_merged_tree(_tree,False))
+
+    # ([0, 2, 3, 4, 8, 9, 10, 14], [1, 5, 6, 7, 11, 12, 13, 15])
+    # [[0, 2, 3, 4, 8, 9, 10, 14], [1, 5, 6, 7, 11, 12, 13, 15]]
+    # [[[[0, 4], [3, 10]], [[2, 9], [8, 14]]], [[[1, 7], [6, 13]], [[5, 12], [11, 15]]]]
+    # 2
+    # [0, 4, 3, 10, 2, 9, 8, 14, 1, 7, 6, 13, 5, 12, 11, 15]
+    
+# test()

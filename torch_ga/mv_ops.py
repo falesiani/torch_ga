@@ -1,7 +1,9 @@
 """Operations on geometric algebra tensors used internally."""
 from typing import Union
 import torch
-
+# import einops
+# from opt_einsum_torch import einsum
+# from icecream import ic
 
 def mv_multiply(a_blade_values: torch.Tensor, b_blade_values: torch.Tensor, cayley: torch.Tensor) -> torch.Tensor:
     # x = torch.einsum("i,j,ijk->k", a_blade_values, b_blade_values, cayley)
@@ -22,22 +24,28 @@ def mv_multiply(a_blade_values: torch.Tensor, b_blade_values: torch.Tensor, cayl
     # # ...i, ijk -> ...jk
     # x = torch.tensordot(a_blade_values, cayley, dims=[-1, 0])
     # x = torch.tensordot(a_blade_values, cayley, dims=([-1, 0],[-1,0]))
-    x = torch.tensordot(a_blade_values, cayley, dims=([-1],[0]))
+    # ic(a_blade_values.shape,b_blade_values.shape)
+    # ic(a_blade_values.dtype,b_blade_values.dtype,cayley.dtype)
+    if False:
+        x = torch.tensordot(a_blade_values, cayley, dims=([-1],[0]))
 
-    # # ...1j, ...jk -> ...1k
-    # x = tf.expand_dims(b_blade_values, axis=b_blade_values.shape.ndims - 1) @ x
-    # x = b_blade_values.unsqueeze(len(b_blade_values.shape) - 1) @ x
-    x = b_blade_values.unsqueeze(-2) @ x        
-    # # ...1k -> ...k
-    # x = torch.squeeze(x, axis=-2)
-    x = torch.squeeze(x, axis=-2) 
+        # # ...1j, ...jk -> ...1k
+        # x = tf.expand_dims(b_blade_values, axis=b_blade_values.shape.ndims - 1) @ x
+        # x = b_blade_values.unsqueeze(len(b_blade_values.shape) - 1) @ x
+        # ic(b_blade_values.unsqueeze(-2).shape,x.shape)
+        x = b_blade_values.unsqueeze(-2) @ x        
+        # # ...1k -> ...k
+        # x = torch.squeeze(x, axis=-2)
+        x = torch.squeeze(x, axis=-2) 
        
     # # # ...1j, ...jk -> ...1k
     # x = b_blade_values @ x        
     
     # print(f"same opeartions? x.shape={x.shape},x1.shape={x1.shape}")
     
-    # # einsum
+    x = torch.einsum("...i,...j,ijk->...k", a_blade_values, b_blade_values, cayley)
+    
+    # # # einsum
     # x1 = torch.einsum("...i,...j,ijk->...k", a_blade_values, b_blade_values, cayley)    
     # assert(torch.all(torch.isclose(x1,x))), f"should be the same operation x[0]={x[0]}, x1[0]={x1[0]}"
     
@@ -107,7 +115,8 @@ def f_mv_conv1d(input, weight, cayley: torch.Tensor, bias=None, stride=1, paddin
     # a,b,c,d * e,a,b,f * c,f,g -> e,b,d,g
     # ...abcd, eabf, cfg -> ...ebdg  
     x = torch.einsum("...abcd, eabf, cfg -> ...ebdg", input_unfold, weight, cayley)
-    x = x.view(batch,out_channels,-1,num_blades) + (bias.view(1,out_channels,1,num_blades) if bias else 0) 
+    # x = x.view(batch,out_channels,-1,num_blades) + (bias.view(1,out_channels,1,num_blades) if bias else 0) 
+    x = x.reshape(batch,out_channels,-1,num_blades) + (bias.reshape(1,out_channels,1,num_blades) if bias else 0) 
     x = x.permute(0,2,1,3)
     return x
 

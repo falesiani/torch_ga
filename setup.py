@@ -15,7 +15,7 @@ setup(
     description="Clifford and Geometric Algebra with PyTorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="0.0.2",
+    version="0.0.4",    
     url="https://github.com/falesiani/torch_ga",
     author="Francesco Alesiani",
     author_email="francesco.alesiani@neclab.eu",
