@@ -1,5 +1,6 @@
 [build-system]
 requires = ["setuptools>=61.0"]
+# requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -39,3 +40,7 @@ Repository = "https://github.com/falesiani/torch_ga.git"
 
 [tool.setuptools.dynamic]
 version = {attr = "torch_ga.__version__.__version__"} 
+
+[tool.setuptools]
+packages = ["torch_ga", "torch_ga.clifford"]
+
