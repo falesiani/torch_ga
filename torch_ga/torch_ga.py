@@ -54,7 +54,10 @@ class GeometricAlgebra:
         """
         self.dtype = dtype
         # self._metric = torch.tensor(metric, dtype=torch.float32)
-        self._metric = torch.tensor(metric)
+        if isinstance(metric, torch.Tensor):
+            self._metric = metric.detach()
+        else:
+            self._metric = torch.tensor(metric)
         
 
         self._num_bases = len(metric)
