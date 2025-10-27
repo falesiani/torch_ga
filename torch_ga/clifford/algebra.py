@@ -13,7 +13,7 @@ class CliffordAlgebra(nn.Module):
     def __init__(self, metric):
         super().__init__()
 
-        self.register_buffer("metric", torch.as_tensor(metric))
+        self.register_buffer("metric", torch.as_tensor(metric.detach() if isinstance(metric, torch.Tensor) else metric))
         self.num_bases = len(metric)
         self.bbo = ShortLexBasisBladeOrder(self.num_bases)
         self.dim = len(self.metric)

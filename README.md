@@ -142,6 +142,48 @@ result = sequence(tensor)
 ```
 
 
+## Clifford Algebra
+
+It is now available the Clifford Algebra, which has similar primitives to the Geometric Algebra class, but it is inspired by recent developments. 
+
+```python
+from torch_ga.clifford.algebra import CliffordAlgebra
+
+signature = [1,1,-1]
+
+cl = CliffordAlgebra(signature)
+
+a = cl.embed(torch.tensor([3.,5.]),(3,4))
+b = cl.embed(torch.tensor([2.,1.]),(3,4))
+
+print(cl.product(a,b))
+print(cl.inner_product(a,b),cl.outer_product(a,b))
+
+# Converting to GA
+ga = cl.to_ga()
+
+a = ga(a)
+b = ga(b)
+
+print(a,b,a*b)
+
+```
+
+```python
+from torch_ga import GeometricAlgebra
+signature = [1,1,-1]
+# Converting to CL
+ga = GeometricAlgebra(signature)
+cl = ga.to_cl()
+
+a = cl.embed(torch.tensor([3.,5.]),(3,4))
+b = cl.embed(torch.tensor([2.,1.]),(3,4))
+
+print(cl.product(a,b))
+print(cl.inner_product(a,b),cl.outer_product(a,b))
+
+```
+
 ### Available layers
 | Class | Description |
 |--|--|
@@ -169,6 +211,8 @@ result = sequence(tensor)
 [Projective Geometric Algebra](https://github.com/Falesiani/torch_ga/tree/master/notebooks/pga.ipynb)
 
 [1D Multivector-valued Convolution Example](https://github.com/Falesiani/torch_ga/tree/master/notebooks/conv.ipynb)
+
+[Clifford class and its relationship with Geometric class](https://github.com/Falesiani/torch_ga/tree/master/notebooks/clifford.ipynb)
 
 ## Tests
 Tests using Python's built-in [`unittest`](https://docs.python.org/3/library/unittest.html) module are available in the `tests` directory. All tests can be run by

@@ -34,8 +34,6 @@ def int_comb(n,k):
         n -= 1
     return ntok // ktok
 
-
-
 from icecream import ic
 class GeometricAlgebra:
     """Class used for performing geometric algebra operations on `torch.Tensor` instances.
@@ -125,6 +123,23 @@ class GeometricAlgebra:
         self._complex_list, self._complex_tree = None, None
         if self._compute_complex_flag:
             self._complex_list, self._complex_tree = get_complex_indexes(self._dim)
+
+    # def to_cl(self) -> CliffordAlgebra:
+    #     """Creates a `CliffordAlgebra` from the Clifford Algebra
+
+    #     Returns:
+    #         `CliffordAlgebra` 
+    #     """
+    #     return CliffordAlgebra(self.metric)
+
+    def to_cl(self):
+        from torch_ga.clifford import CliffordAlgebra
+        """Creates a `CliffordAlgebra` from the Clifford Algebra
+
+        Returns:
+            `CliffordAlgebra` 
+        """
+        return CliffordAlgebra(self.metric)
 
     def print(self, *args, **kwargs):
         """Same as the default `print` function but formats `torch.Tensor`

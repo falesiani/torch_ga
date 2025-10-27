@@ -6,8 +6,7 @@ An python library for Geometric Algebra in Pytorch
 
 __author__ = 'Francesco Alesiani'
 __credits__ = 'Torch-GA'
-
-# from .torch_ga import GeometricAlgebra
+  
 from .torch_ga import *
 from .blades import *
 from .cayley import *
@@ -19,4 +18,3 @@ from .plots import *
 from .jacobian import *
 from .transform import *
 from .__version__ import __version__
-# from .clifford.algebra import *
