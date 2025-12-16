@@ -10,7 +10,7 @@ import numbers
 import numpy as np
 import torch
 # import einops
-# from icecream import ic
+from icecream import ic
 import functools
 
 from .cayley import get_cayley_tensor, blades_from_bases
@@ -34,7 +34,11 @@ def int_comb(n,k):
         n -= 1
     return ntok // ktok
 
-from icecream import ic
+
+# topar = lambda x: torch.nn.Parameter(torch.tensor(x) if isinstance(x,(list,tuple)) else x, requires_grad=False)
+totorch = lambda x: torch.tensor(x) if isinstance(x,(list,tuple)) else x
+topar = lambda x: torch.nn.Parameter(x, requires_grad=False)
+ltopar = lambda x: [ topar(_) for _ in x]
 class GeometricAlgebra:
     """Class used for performing geometric algebra operations on `torch.Tensor` instances.
     Exposes methods for operating on `torch.Tensor` instances where their last
@@ -42,7 +46,8 @@ class GeometricAlgebra:
     Holds the metric and other quantities derived from it.
     """
 
-    def __init__(self, metric: List[float], compute_complex_flag=False, dtype=torch.float32):
+    def __init__(self, metric: List[float], compute_complex_flag=False, dtype=torch.float32, device="cpu"):
+        super().__init__()
         """Creates a GeometricAlgebra object given a metric.
         The algebra will have as many basis vectors as there are
         elements in the metric.
@@ -51,6 +56,7 @@ class GeometricAlgebra:
             metric: Metric as a list. Specifies what basis vectors square to
         """
         self.dtype = dtype
+        self.device = device
         # self._metric = torch.tensor(metric, dtype=torch.float32)
         if isinstance(metric, torch.Tensor):
             self._metric = metric.detach()
@@ -73,6 +79,7 @@ class GeometricAlgebra:
 
         self._blades, self._blade_degrees = blades_from_bases(self._bases)
         self._blade_degrees = torch.tensor(self._blade_degrees)
+        
         self._even_grades = self._blade_degrees%2 == 0
         self._odd_grades =~self._even_grades
         self._num_blades = len(self._blades)
@@ -123,7 +130,25 @@ class GeometricAlgebra:
         self._complex_list, self._complex_tree = None, None
         if self._compute_complex_flag:
             self._complex_list, self._complex_tree = get_complex_indexes(self._dim)
+            
+       
+        self.to(device)
 
+    def to(self,device):
+        self.device = device                
+        self._blade_degrees = self._blade_degrees.to(device)
+        self._even_grades = self._even_grades.to(device)
+        self._odd_grades = self._odd_grades.to(device)
+        self._max_degree = self._max_degree.to(device)
+        self._cayley, self._cayley_inner, self._cayley_outer = self._cayley.to(device), self._cayley_inner.to(device), self._cayley_outer.to(device) 
+        self._blade_mvs = self._blade_mvs.to(device)
+        self._basis_mvs = self._basis_mvs.to(device)
+        self._dual_blade_indices = self._dual_blade_indices.to(device)
+        self._dual_blade_signs = self._dual_blade_signs.to(device)
+        self._I = self._I.to(device)
+        self._Imv = self._Imv.to(device)
+        return self
+        
     # def to_cl(self) -> CliffordAlgebra:
     #     """Creates a `CliffordAlgebra` from the Clifford Algebra
 
@@ -199,7 +224,12 @@ class GeometricAlgebra:
         """ number of basis degree=1
         """
         return self._num_blades
-    
+    @property
+    def num_coordinates(self) -> int:
+        """ number of coordinates degree=1
+        """
+        return self._num_bases_all
+        
     @property
     def real_idx(self)->list: return self._real_idx
     @property
@@ -304,6 +334,28 @@ class GeometricAlgebra:
     def basis_mvs(self) -> torch.Tensor:
         """List of basis vectors as torch.Tensor."""
         return self._basis_mvs
+
+    def embed(self, tensor: torch.Tensor, tensor_index: torch.Tensor) -> torch.Tensor:
+        mv = torch.zeros(
+            *tensor.shape[:-1], 2**self.dim, device=tensor.device, dtype=tensor.dtype
+        )
+        mv[..., tensor_index] = tensor
+        mv = mv.to(dtype=torch.float32)
+        return mv
+
+    def embed_grade(self, tensor: torch.Tensor, grade: int) -> torch.Tensor:
+        mv = torch.zeros(*tensor.shape[:-1], 2**self.dim, device=tensor.device)
+        s = self.grade_to_slice[grade]
+        mv[..., s] = tensor
+        return mv
+
+    def get(self, mv: torch.Tensor, blade_index: tuple[int]) -> torch.Tensor:
+        blade_index = tuple(blade_index)
+        return mv[..., blade_index]
+
+    def get_grade(self, mv: torch.Tensor, grade: int) -> torch.Tensor:
+        s = self.grade_to_slice[grade]
+        return mv[..., s]
 
     def get_kind_blade_indices(self, kind: BladeKind, invert: bool = False) -> torch.Tensor:
         """Find all indices of blades of a given kind in the algebra.
@@ -634,6 +686,7 @@ class GeometricAlgebra:
         """
         blade_signs, blade_indices = get_blade_indices_from_names(
             blades, self.blades)
+        blade_signs, blade_indices = blade_signs.to(self.device), blade_indices.to(self.device) 
 
         assert type(blade_indices) in [torch.Tensor], "should be a tensor"
         if False: blade_indices = torch.tensor(blade_indices)
@@ -662,6 +715,8 @@ class GeometricAlgebra:
         # )
         assert blade_indices.shape[0] == torch.unique(blade_indices).shape[0], "indexes not unique"
 
+        # ic = print
+        # ic(blade_signs.device,self.blade_mvs.device)
         x = blade_signs.unsqueeze(-1) *  self.blade_mvs[blade_indices]
 
         # a, b -> b

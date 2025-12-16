@@ -34,6 +34,11 @@ class MultiVector:
         """blades multivector."""
         return self._algebra.split(self._blade_values)
 
+    def to(self,device):
+        # self._algebra.to(device)
+        self._blade_values.to(device)
+        return self
+
     @property
     def blades(self):
         """blades multivector."""

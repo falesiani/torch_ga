@@ -9,37 +9,77 @@ from torch import nn
 from torch_ga.clifford.blades import ShortLexBasisBladeOrder, construct_gmt, gmt_element
 from torch_ga import GeometricAlgebra, MultiVector
 
+from icecream import ic
+
+tdet = lambda x: torch.as_tensor(x.detach()) if isinstance(x, torch.Tensor) else x
+totorch = lambda x: torch.as_tensor(x) if isinstance(x,(list,tuple)) else x
+# topar = lambda x: torch.nn.Parameter(tdet(totorch(x)), requires_grad=False)
+topar = lambda x: torch.nn.Parameter(totorch(x), requires_grad=False)
+ltopar = lambda x: [ topar(_) for _ in x]
 class CliffordAlgebra(nn.Module):
-    def __init__(self, metric):
+    def __init__(self, metric, device='cpu'):
         super().__init__()
 
-        self.register_buffer("metric", torch.as_tensor(metric.detach() if isinstance(metric, torch.Tensor) else metric))
+        # self.register_buffer("metric", torch.as_tensor(metric.detach() if isinstance(metric, torch.Tensor) else metric))
+        self.metric = topar(metric)
         self.num_bases = len(metric)
         self.bbo = ShortLexBasisBladeOrder(self.num_bases)
         self.dim = len(self.metric)
         self.n_blades = len(self.bbo.grades)
         cayley, cayley_inner, cayley_outer  = [_ for _ in construct_gmt(self.bbo.index_to_bitmap, self.bbo.bitmap_to_index, self.metric)]
         cayley, cayley_inner, cayley_outer  = [ _.to_dense().to(torch.get_default_dtype()) for _ in [cayley, cayley_inner, cayley_outer]] 
-        self.grades = self.bbo.grades.unique()
-        self.register_buffer(
-            "subspaces",
-            torch.tensor(tuple(math.comb(self.dim, g) for g in self.grades)),
-        )
+        self.grades = topar(self.bbo.grades.unique())
+        self.subspaces =  topar(torch.tensor(tuple(math.comb(self.dim, g) for g in self.grades)))
+        # self.register_buffer(
+        #     "subspaces",
+        #     torch.tensor(tuple(math.comb(self.dim, g) for g in self.grades)),
+        # )
         self.n_subspaces = len(self.grades)
         self.grade_to_slice = self._grade_to_slice(self.subspaces)
         self.grade_to_index = [
-            torch.tensor(range(*s.indices(s.stop))) for s in self.grade_to_slice
+            topar(torch.tensor(range(*s.indices(s.stop)))) for s in self.grade_to_slice
         ]
 
-        self.register_buffer(
-            "bbo_grades", self.bbo.grades.to(torch.get_default_dtype())
-        )
-        self.register_buffer("even_grades", self.bbo_grades % 2 == 0)
-        self.register_buffer("odd_grades", ~self.even_grades)
-        self.register_buffer("cayley", cayley)
-        self.register_buffer("cayley_inner", cayley_inner)
-        self.register_buffer("cayley_outer", cayley_outer)
+        # self.register_buffer(
+        #     "bbo_grades", self.bbo.grades.to(torch.get_default_dtype())
+        # )
+        # self.register_buffer("even_grades", self.bbo_grades % 2 == 0)
+        # self.register_buffer("odd_grades", ~self.even_grades)
+        # self.register_buffer("cayley", cayley)
+        # self.register_buffer("cayley_inner", cayley_inner)
+        # self.register_buffer("cayley_outer", cayley_outer)
+        self.bbo_grades = topar(self.bbo.grades.to(torch.get_default_dtype()))
         
+        self.even_grades=topar(self.bbo_grades % 2 == 0)
+        self.odd_grades=topar(~self.even_grades)
+        self.cayley=topar(cayley)
+        self.cayley_inner=topar(cayley_inner)
+        self.cayley_outer=topar(cayley_outer)
+        
+        self.to(device)
+        
+    # def to(self,device):
+    #     # super().to(device)
+    #     self.device=device
+    #     self.metric=self.metric.to(device)
+    #     self.grades=self.grades.to(device)
+    #     self.subspaces=self.subspaces.to(device)
+    #     # self.grade_to_slice.to(device)
+    #     self.grade_to_index = [_.to(device) for _ in self.grade_to_index]
+
+    #     self.bbo_grades = self.bbo_grades.to(device)
+        
+    #     self.even_grades=self.even_grades.to(device)
+    #     self.odd_grades=self.odd_grades.to(device)
+    #     self.cayley=self.cayley.to(device)
+    #     self.cayley_inner=self.cayley_inner.to(device)
+    #     self.cayley_outer=self.cayley_outer.to(device)
+        
+    #     return self
+        
+    # def register_buffer(self, name, tensor, persistent = True):        
+        # return super().register_buffer(name, tensor, persistent)
+    
     def geometric_product(self, a, b, blades=None):
         return self.product(a, b, blades, _type="geometric")
     def inner_product(self, a, b, blades=None):
@@ -62,7 +102,7 @@ class CliffordAlgebra(nn.Module):
             assert isinstance(blades_o, torch.Tensor)
             assert isinstance(blades_r, torch.Tensor)
             cayley = cayley[blades_l[:, None, None], blades_o[:, None], blades_r]
-
+                    
         return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
 
     def __call__(self, a: torch.Tensor) -> MultiVector:
@@ -77,7 +117,13 @@ class CliffordAlgebra(nn.Module):
         """
         if False: a = a.to(dtype=torch.float32)
         # return MultiVector(a, GeometricAlgebra(self.metric.detach().numpy()))
-        return MultiVector(a, GeometricAlgebra(self.metric))
+        # return MultiVector(a, GeometricAlgebra(self.metric, device=self.cayley.device))
+        # ga = GeometricAlgebra(self.metric,device=a.device if device is None else device)
+        ga = GeometricAlgebra(self.metric)
+        ga = ga.to(a.device)
+        # ic(a.device, ga.device)
+        return MultiVector(a,ga)
+        # return MultiVector(a, self)
     
     def to_ga(self) -> GeometricAlgebra:
         """Creates a `GeometricAlgebra` from the Clifford Algebra
