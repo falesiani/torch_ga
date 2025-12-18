@@ -101,7 +101,7 @@ class CliffordAlgebra(nn.Module):
             assert isinstance(blades_l, torch.Tensor)
             assert isinstance(blades_o, torch.Tensor)
             assert isinstance(blades_r, torch.Tensor)
-            cayley = cayley[blades_l[:, None, None], blades_o[:, None], blades_r]
+            cayley = cayley[blades_l[:, None, None].long(), blades_o[:, None].long(), blades_r.long()]
                     
         return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
 
@@ -166,7 +166,7 @@ class CliffordAlgebra(nn.Module):
         """Clifford main anti-involution (reversion)"""
         signs = self._beta_signs
         if blades is not None:
-            signs = signs[blades]
+            signs = signs[blades.long()]
         return signs * mv.clone()
 
     def gamma(self, mv, blades=None):
@@ -221,10 +221,10 @@ class CliffordAlgebra(nn.Module):
                 blades[1],
             )
         else:
-            blades = torch.tensor(range(self.n_blades))
+            blades = torch.tensor(range(self.n_blades),dtype=torch.long).to(self.cayley)
             blades = (
                 blades,
-                torch.tensor([0]),
+                torch.tensor([0],dtype=torch.long).to(self.cayley),
                 blades,
             )
             beta_blades = None
