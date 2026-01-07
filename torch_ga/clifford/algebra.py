@@ -200,6 +200,39 @@ class CliffordAlgebra(nn.Module):
     def get_grade(self, mv: torch.Tensor, grade: int) -> torch.Tensor:
         s = self.grade_to_slice[grade]
         return mv[..., s]
+    
+    def get_scalar(self,a):
+        """scalar part of multivector."""
+        return a[...,0]
+    def get_pseudo_scalar(self,a):
+        """scalar part of multivector."""
+        return a[...,-1]
+    def get_vector(self,a):
+        """vector part of multivector."""
+        return a[...,1:self.dim+1]
+    def get_pseudo_vector(self,a):
+        """vector part of multivector."""
+        return a[...,-self.dim-1:-1]
+    def get_bivector(self,a):
+        """bivector part of multivector."""        
+        s = self.grade_to_slice[2]
+        return a[..., s]
+    def get_pseudo_bivector(self,a):
+        """pseudo bivector part of multivector."""
+        s = self.grade_to_slice[self.dim-2]
+        return a[..., s]
+    def get_trivector(self,a):
+        """bivector part of multivector."""        
+        s = self.grade_to_slice[3]
+        return a[..., s]
+    def get_pseudo_trivector(self,a):
+        """pseudo bivector part of multivector."""
+        s = self.grade_to_slice[self.dim-3]
+        return a[..., s]
+    def get_blade(self,a,deg):
+        """deg-degreee blade part of multivector."""
+        s = self.grade_to_slice[deg]
+        return a[..., s]
 
     def b(self, x, y, blades=None):
         """Bilinear Form b(x,y): xy+yx = 2b(x,y), I would call the inner product

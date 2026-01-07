@@ -61,7 +61,7 @@ class GeometricAlgebra:
         if isinstance(metric, torch.Tensor):
             self._metric = metric.detach()
         else:
-            self._metric = torch.tensor(metric)
+            self._metric = torch.tensor(metric, device=self.device)
         
 
         self._num_bases = len(metric)
@@ -78,7 +78,7 @@ class GeometricAlgebra:
         self._bases = list(map(i2c, range(self._num_bases)))
 
         self._blades, self._blade_degrees = blades_from_bases(self._bases)
-        self._blade_degrees = torch.tensor(self._blade_degrees)
+        self._blade_degrees = torch.tensor(self._blade_degrees,device=self.device)
         
         self._even_grades = self._blade_degrees%2 == 0
         self._odd_grades =~self._even_grades
@@ -93,6 +93,7 @@ class GeometricAlgebra:
         self._cayley, self._cayley_inner, self._cayley_outer = torch.tensor(
             _list,
             dtype= self.dtype
+            , device=self.device
             # dtype=torch.float32
         )
 
@@ -114,9 +115,9 @@ class GeometricAlgebra:
             self._dual_blade_signs.append(dual_sign)
 
         self._dual_blade_indices = torch.tensor(
-            self._dual_blade_indices, dtype=torch.int64)
+            self._dual_blade_indices, dtype=torch.int64, device=self.device)
         self._dual_blade_signs = torch.tensor(
-            self._dual_blade_signs)
+            self._dual_blade_signs, device=self.device)
             # , dtype=torch.float32)
         
         self._I = self.e(self._blades[-1])
@@ -345,8 +346,7 @@ class GeometricAlgebra:
 
     def embed_grade(self, tensor: torch.Tensor, grade: int) -> torch.Tensor:
         mv = torch.zeros(*tensor.shape[:-1], 2**self.dim, device=tensor.device)
-        s = self.grade_to_slice[grade]
-        mv[..., s] = tensor
+        mv[..., self.blade_degrees==grade] = tensor
         return mv
 
     def get(self, mv: torch.Tensor, blade_index: tuple[int]) -> torch.Tensor:
@@ -354,8 +354,35 @@ class GeometricAlgebra:
         return mv[..., blade_index]
 
     def get_grade(self, mv: torch.Tensor, grade: int) -> torch.Tensor:
-        s = self.grade_to_slice[grade]
-        return mv[..., s]
+        return mv[..., self.blade_degrees==grade]
+    
+    def get_scalar(self,a):
+        """scalar part of multivector."""
+        return a[...,0]
+    def get_pseudo_scalar(self,a):
+        """scalar part of multivector."""
+        return a[...,-1]
+    def get_vector(self,a):
+        """vector part of multivector."""
+        return a[...,1:self.dim+1]
+    def get_pseudo_vector(self,a):
+        """vector part of multivector."""
+        return a[...,-self.dim-1:-1]
+    def get_bivector(self,a):
+        """bivector part of multivector."""        
+        return a[...,self.blade_degrees==2]
+    def get_pseudo_bivector(self,a):
+        """pseudo bivector part of multivector."""
+        return a[...,self.blade_degrees==(self.dim-2)]
+    def get_trivector(self,a):
+        """bivector part of multivector."""        
+        return a[...,self.blade_degrees==3]
+    def get_pseudo_trivector(self,a):
+        """pseudo bivector part of multivector."""
+        return a[...,self.blade_degrees==(self.dim-3)]    
+    def get_blade(self,a,deg):
+        """deg-degreee blade part of multivector."""
+        return a[...,self.blade_degrees==deg]       
 
     def get_kind_blade_indices(self, kind: BladeKind, invert: bool = False) -> torch.Tensor:
         """Find all indices of blades of a given kind in the algebra.
@@ -577,7 +604,7 @@ class GeometricAlgebra:
             is_scalar = True
         else:
             _shape_final = list(_shape[:-1]) + [self.num_blades] 
-        b = torch.zeros(_shape_final)
+        b = torch.zeros(_shape_final, device=self.device)
 
         if False:
             print(f"blade_indices.shape={blade_indices.shape}")
@@ -615,6 +642,7 @@ class GeometricAlgebra:
         if is_scalar:
             # b=b.unsqueeze(0)
             b=b.squeeze(0)
+        b=b.to(device=self.device)
         return b
 
 
@@ -672,7 +700,7 @@ class GeometricAlgebra:
         """
         # return self.from_tensor_with_kind(tf.expand_dims(scalar, axis=-1), BladeKind.SCALAR)
         # print("torch.tensor([scalar]).unsqueeze(-1).shape",torch.tensor([scalar]).unsqueeze(-1).shape)
-        return self.from_tensor_with_kind(torch.tensor([scalar]).unsqueeze(-1), BladeKind.SCALAR).squeeze(0)
+        return self.from_tensor_with_kind(torch.tensor([scalar], device=self.device).unsqueeze(-1), BladeKind.SCALAR).squeeze(0)
 
     def e(self, *blades: List[str]) -> torch.Tensor:
         """Returns a geometric algebra torch.Tensor with the given blades set
@@ -781,7 +809,7 @@ class GeometricAlgebra:
             Dual of the geometric algebra tensor
         """
         if not isinstance(tensor,torch.Tensor):
-            tensor = torch.tensor(tensor)
+            tensor = torch.tensor(tensor, device=self.device)
             # tensor = torch.tensor(tensor, dtype=torch.float32)
 
         # else:
@@ -869,8 +897,8 @@ class GeometricAlgebra:
         Returns:
             regressive product of a and b
         """
-        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32)
-        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32)
+        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32, device=self.device)
+        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32, device=self.device)
 
         return self.dual(self.ext_prod(self.dual(a), self.dual(b)))
     
@@ -887,8 +915,8 @@ class GeometricAlgebra:
         Returns:
             left contraction of a and b
         """
-        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32)
-        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32)
+        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32, device=self.device)
+        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32, device=self.device)
 
         return self.dual(self.ext_prod(a, self.dual(b)))
     
@@ -905,8 +933,8 @@ class GeometricAlgebra:
         Returns:
             right contraction of a and b
         """
-        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32)
-        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32)
+        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32, device=self.device)
+        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32, device=self.device)
 
         return self.dual(self.ext_prod(self.dual(a), b))
 
@@ -923,8 +951,8 @@ class GeometricAlgebra:
         Returns:
             projection of a and b: P_B(A)
         """
-        if not isinstance(a,(torch.Tensor,MultiVector)): a = torch.tensor(a, dtype=torch.float32)
-        if not isinstance(b,(torch.Tensor,MultiVector)): b = torch.tensor(b, dtype=torch.float32)
+        if not isinstance(a,(torch.Tensor,MultiVector)): a = torch.tensor(a, dtype=torch.float32, device=self.device)
+        if not isinstance(b,(torch.Tensor,MultiVector)): b = torch.tensor(b, dtype=torch.float32, device=self.device)
 
         # return self.left_contraction(self.left_contraction(a,self.inverse(b)),b)
         return self.left_contraction(self.left_contraction(a,b),self.inverse(b))
@@ -942,8 +970,8 @@ class GeometricAlgebra:
         Returns:
             orthogonal projection of a and b: P_B(A)
         """
-        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32)
-        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32)
+        if not isinstance(a,torch.Tensor): a = torch.tensor(a, dtype=torch.float32, device=self.device)
+        if not isinstance(b,torch.Tensor): b = torch.tensor(b, dtype=torch.float32, device=self.device)
 
         # return self.left_contraction(self.left_contraction(a,self.inverse(b)),b)
         return a-self.projection(a,b)
@@ -1402,7 +1430,7 @@ class GeometricAlgebra:
         blade_signs, blade_indices = get_blade_indices_from_names(
             blade_names, self.blades)
 
-        result = blade_signs * self.select_blades(a, blade_indices)
+        result = blade_signs * self.select_blades(a, blade_indices.to(device=self.device))
         # if True:
         #     print(f"")
 
