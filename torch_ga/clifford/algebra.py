@@ -22,10 +22,13 @@ class CliffordAlgebra(nn.Module):
 
         # self.register_buffer("metric", torch.as_tensor(metric.detach() if isinstance(metric, torch.Tensor) else metric))
         self.metric = topar(metric)
-        self.num_bases = len(metric)
+        # self.num_bases = len(metric)
+        self.n_bases = len(metric)
+        self._p,self._q,self._r = sum([1 for _ in metric if _>0]),sum([1 for _ in metric if _<0]),sum([1 for _ in metric if _==0])
         self.bbo = ShortLexBasisBladeOrder(self.num_bases)
-        self.dim = len(self.metric)
-        self.num_blades = self.n_blades = len(self.bbo.grades)
+        self._dim = len(self.metric)
+        # self.num_blades = 
+        self.n_blades = len(self.bbo.grades)
         cayley, cayley_inner, cayley_outer  = [_ for _ in construct_gmt(self.bbo.index_to_bitmap, self.bbo.bitmap_to_index, self.metric)]
         cayley, cayley_inner, cayley_outer  = [ _.to_dense().to(torch.get_default_dtype()) for _ in [cayley, cayley_inner, cayley_outer]] 
         self.grades = topar(self.bbo.grades.unique())
@@ -153,6 +156,37 @@ class CliffordAlgebra(nn.Module):
     @functools.cached_property
     def _gamma_signs(self):
         return torch.pow(-1, self.bbo_grades * (self.bbo_grades + 1) // 2)
+
+    @property
+    def p(self) -> int:
+        """ G(p,q,r)
+        """
+        return self._p
+    @property
+    def q(self) -> int:
+        """ G(p,q,r)
+        """
+        return self._q
+    @property
+    def r(self) -> int:
+        """ G(p,q,r)
+        """
+        return self._r
+    @property
+    def dim(self) -> int:
+        """ G(p,q,r|n=p+q+r)
+        """
+        return self._dim
+    @property
+    def num_bases(self) -> int:
+        """ number of basis degree=1
+        """
+        return self.n_bases
+    @property
+    def num_blades(self) -> int:
+        """ number of basis degree=1
+        """
+        return self.n_blades
 
     def alpha(self, mv, blades=None):
         """Clifford main involution"""
