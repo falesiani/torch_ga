@@ -16,7 +16,7 @@ totorch = lambda x: torch.as_tensor(x) if isinstance(x,(list,tuple)) else x
 # topar = lambda x: torch.nn.Parameter(tdet(totorch(x)), requires_grad=False)
 topar = lambda x: torch.nn.Parameter(totorch(x), requires_grad=False)
 ltopar = lambda x: [ topar(_) for _ in x]
-class CliffordAlgebra(nn.Module):
+class CliffordAlgebra(nn.Module):            
     def __init__(self, metric, device='cpu'):
         super().__init__()
 

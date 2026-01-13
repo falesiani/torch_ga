@@ -20,6 +20,19 @@ from .mv_ops import mv_multiply, mv_reversion, mv_grade_automorphism, mv_conv1d,
 from .mv import MultiVector
 from .torch_ga import GeometricAlgebra
 
+# Converts the signature (p,q,r) into the metric
+def signature2metric(p,q=0,r=0):
+    sign = (p,q,r)
+    # assert(isinstance(sign,(list,tuple))), f"the signature should be a list pr tuple of maximum three numbers (p,q,r)"
+    # assert(len(sign)<=3), f"the signature is at maximum a list of three numbers (p,q,r)"
+    # metric = [v*k for k,v in zip(sign,[[1],[-1],[0]][:len(sign)])]
+    # metric = [v*k for k,v in zip(sign,[[1],[-1],[0]])]
+    metric = []
+    for k,v in zip(sign,[1,-1,0]):
+        if k>0:
+            metric+=[v]*k
+    return metric
+
 
 # Probably the primary encoding
 # 
