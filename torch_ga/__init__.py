@@ -17,4 +17,5 @@ from .utils import *
 from .plots import *
 from .jacobian import *
 from .transform import *
+from .clifford.algebra import CliffordAlgebra
 from .__version__ import __version__

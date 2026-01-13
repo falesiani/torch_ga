@@ -25,7 +25,7 @@ class CliffordAlgebra(nn.Module):
         self.num_bases = len(metric)
         self.bbo = ShortLexBasisBladeOrder(self.num_bases)
         self.dim = len(self.metric)
-        self.n_blades = len(self.bbo.grades)
+        self.num_blades = self.n_blades = len(self.bbo.grades)
         cayley, cayley_inner, cayley_outer  = [_ for _ in construct_gmt(self.bbo.index_to_bitmap, self.bbo.bitmap_to_index, self.metric)]
         cayley, cayley_inner, cayley_outer  = [ _.to_dense().to(torch.get_default_dtype()) for _ in [cayley, cayley_inner, cayley_outer]] 
         self.grades = topar(self.bbo.grades.unique())
