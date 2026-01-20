@@ -161,17 +161,17 @@ class CliffordAlgebra(nn.Module):
         return torch.pow(-1, self.bbo_grades * (self.bbo_grades + 1) // 2)
 
     @property
-    def p(self) -> int:
+    def sign_p(self) -> int:
         """ G(p,q,r)
         """
         return self._p
     @property
-    def q(self) -> int:
+    def sign_q(self) -> int:
         """ G(p,q,r)
         """
         return self._q
     @property
-    def r(self) -> int:
+    def sign_r(self) -> int:
         """ G(p,q,r)
         """
         return self._r
