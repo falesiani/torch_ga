@@ -106,9 +106,9 @@ class CliffordAlgebra(nn.Module):
             assert isinstance(blades_r, torch.Tensor)
             cayley = cayley[blades_l[:, None, None].long(), blades_o[:, None].long(), blades_r.long()]
                     
-        return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
+        # return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
         # return torch.einsum("...i,...j,ikj->...k", a, b, cayley) # equivalent GL
-        # return torch.einsum("...i,...j,ijk->...k", a, b, cayley) #from GA
+        return torch.einsum("...i,...j,ijk->...k", a, b, cayley) #from GA
         
 
     def __call__(self, a: torch.Tensor) -> MultiVector:
@@ -338,8 +338,7 @@ class CliffordAlgebra(nn.Module):
         return self._smooth_abs_sqrt(self.q(mv, blades=blades))
     
     def norm(self, mv, blades=None):
-        y = self.conjugate(mv)
-        return abs(self.product(y, y, blades=blades)[...,0])**0.5
+        return abs(self.product(mv, self.conjugate(mv), blades=blades)[...,0])**0.5
 
     def norms(self, mv, grades=None):
         if grades is None:
