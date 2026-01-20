@@ -832,6 +832,15 @@ class GeometricAlgebra:
         if False: tensor = tensor.to(dtype=torch.float32)
         return mv_grade_automorphism(tensor, self.blade_degrees)
 
+    def reverse(self,x):
+        """
+        Same as reversion
+        
+        :param x: Tensor
+        :return: Reverse Tensor
+        """
+        return mv_reversion(x, self.blade_degrees)
+    
     def reversion(self, tensor: torch.Tensor) -> torch.Tensor:
         """Returns the grade-reversed geometric algebra tensor.
         See https://en.wikipedia.org/wiki/Paravector#Reversion_conjugation.
@@ -845,6 +854,9 @@ class GeometricAlgebra:
         if False: tensor = tensor.to(dtype=torch.float32)
 
         return mv_reversion(tensor, self.blade_degrees)
+
+    def conjugate(self, x):
+        return self.grade_automorphism(self.reverse(x))
 
     def conjugation(self, tensor: torch.Tensor) -> torch.Tensor:
         """Combines reversion and grade automorphism.
@@ -1034,6 +1046,9 @@ class GeometricAlgebra:
         #     cayley = cayley[blades_l[:, None, None], blades_o[:, None], blades_r]
         # return torch.einsum("...i,ijk,...k->...j", a, cayley, b)    
         return mv_multiply(a, b, self._cayley)
+    
+    def product(self, a: torch.Tensor, b: torch.Tensor, blades=None) -> torch.Tensor:           
+        return mv_multiply(a, b, self._cayley)    
 
     # # start
     # def q(self, mv, blades=None):

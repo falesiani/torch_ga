@@ -93,7 +93,7 @@ class CliffordAlgebra(nn.Module):
         if _type in ["geometric"]:
             cayley = self.cayley
         elif _type in ["inner"]:
-            cayley = self.cayley
+            cayley = self.cayley_inner
         elif _type in ["outer"]:
             cayley = self.cayley_outer
         else:
@@ -107,6 +107,9 @@ class CliffordAlgebra(nn.Module):
             cayley = cayley[blades_l[:, None, None].long(), blades_o[:, None].long(), blades_r.long()]
                     
         return torch.einsum("...i,ijk,...k->...j", a, cayley, b)
+        # return torch.einsum("...i,...j,ikj->...k", a, b, cayley) # equivalent GL
+        # return torch.einsum("...i,...j,ijk->...k", a, b, cayley) #from GA
+        
 
     def __call__(self, a: torch.Tensor) -> MultiVector:
         """Creates a `MultiVector` from a geometric algebra tensor.
@@ -187,7 +190,19 @@ class CliffordAlgebra(nn.Module):
         """ number of basis degree=1
         """
         return self.n_blades
+    @property
+    def blade_degrees(self):
+        return self.bbo_grades
 
+    def grade_automorphism(self, x):        
+        signs = 1.0 - 2.0 * (self.blade_degrees % 2.0)
+        return signs * x
+    
+    def conjugation(self, x):
+        return self.grade_automorphism(self.reverse(x))
+    def conjugate(self, x):
+        return self.grade_automorphism(self.reverse(x))
+    
     def alpha(self, mv, blades=None):
         """Clifford main involution"""
         
@@ -319,8 +334,12 @@ class CliffordAlgebra(nn.Module):
     def _smooth_abs_sqrt(self, input, eps=1e-16):
         return (input**2 + eps) ** 0.25
 
-    def norm(self, mv, blades=None):
+    def norm_(self, mv, blades=None):
         return self._smooth_abs_sqrt(self.q(mv, blades=blades))
+    
+    def norm(self, mv, blades=None):
+        y = self.conjugate(mv)
+        return abs(self.product(y, y, blades=blades)[...,0])**0.5
 
     def norms(self, mv, grades=None):
         if grades is None:
