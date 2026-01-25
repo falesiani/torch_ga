@@ -1444,8 +1444,8 @@ class GeometricAlgebra:
 
         blade_signs, blade_indices = get_blade_indices_from_names(
             blade_names, self.blades)
-
-        result = blade_signs * self.select_blades(a, blade_indices.to(device=self.device))
+        
+        result = blade_signs.to(device=self.device) * self.select_blades(a, blade_indices.to(device=self.device))
         # if True:
         #     print(f"")
 
@@ -1510,8 +1510,11 @@ class GeometricAlgebra:
     def inner(self,a,b):
         return self.inner_prod(a,b)
     
+    def _smooth_abs_sqrt(self, input, eps=1e-16):
+        return (input**2 + eps) ** 0.25        
     def norm(self,a):
-        return abs(self.geom_prod(a, self.conjugation(a))[...,0])**0.5        
+        # return abs(self.geom_prod(a, self.conjugation(a))[...,0])**0.5        
+        return self._smooth_abs_sqrt(self.geom_prod(a, self.conjugation(a))[...,0])       
     def inorm(self,a):
         return self.norm(self.dual(a))        
     def normalized(self,a):
@@ -1520,10 +1523,6 @@ class GeometricAlgebra:
         else:
             return a * (1 / self.norm(a).unsqueeze(-1))
     
-    
-    
-        
-
     def __call__(self, a: torch.Tensor) -> MultiVector:
         """Creates a `MultiVector` from a geometric algebra tensor.
         Mainly used as a wrapper for the algebra's functions for convenience.

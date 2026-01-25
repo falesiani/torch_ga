@@ -338,7 +338,8 @@ class CliffordAlgebra(nn.Module):
         return self._smooth_abs_sqrt(self.q(mv, blades=blades))
     
     def norm(self, mv, blades=None):
-        return abs(self.product(mv, self.conjugate(mv), blades=blades)[...,0])**0.5
+        return self._smooth_abs_sqrt(self.product(mv, self.conjugate(mv), blades=blades)[...,0])
+        # return abs(self.product(mv, self.conjugate(mv), blades=blades)[...,0])**0.5
 
     def norms(self, mv, grades=None):
         if grades is None:
